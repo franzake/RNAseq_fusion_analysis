@@ -1,0 +1,58 @@
+process FUSIONREPORT_DETECT {
+    tag "$meta.id"
+    label 'process_medium'
+
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/a4/a41e89223340438d7cebca8af469cef9189d177bb44373b1bcb010c8e441a444/data' :
+        'community.wave.seqera.io/library/fusion-report_beautifulsoup4_click_colorlog_pruned:4aeac839f8a4fc86'}"
+
+    input:
+    tuple val(meta), path(arriba_fusions), path(starfusion_fusions), path(fusioncatcher_fusions)
+    tuple val(meta2), path(fusionreport_ref)
+    val(tools_cutoff)
+
+    output:
+    tuple val(meta), path("*fusionreport.tsv")           , emit: fusion_list
+    tuple val(meta), path("*fusionreport_filtered.tsv")  , emit: fusion_list_filtered
+    tuple val(meta), path("*index.html")                 , emit: report
+    tuple val(meta), path("*_*.html")                    , emit: html                 , optional:true
+    tuple val(meta), path("*.csv")                       , emit: csv                  , optional:true
+    tuple val(meta), path("*.json")                      , emit: json                 , optional:true
+    tuple val("${task.process}"), val('fusion_report'), eval("fusion_report --version |& sed 's/fusion-report //'"), topic: versions, emit: versions_fusionreport
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
+    def tools = arriba_fusions        ? "--arriba ${arriba_fusions} " : ''
+    tools    += starfusion_fusions    ? "--starfusion ${starfusion_fusions} " : ''
+    tools    += fusioncatcher_fusions ? "--fusioncatcher ${fusioncatcher_fusions} " : ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    fusion_report run ${prefix} . \\
+        ${fusionreport_ref} ${tools} \\
+        --allow-multiple-gene-symbols \\
+        --tool-cutoff ${tools_cutoff} \\
+        ${args} ${args2}
+
+    mv fusion_list.tsv ${prefix}.fusionreport.tsv
+    mv fusion_list_filtered.tsv ${prefix}.fusionreport_filtered.tsv
+    mv index.html ${prefix}_fusionreport_index.html
+    [ ! -f fusions.csv ] || mv fusions.csv ${prefix}.fusions.csv
+    [ ! -f fusions.json ] || mv fusions.json ${prefix}.fusions.json
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}.fusionreport_filtered.tsv
+    touch ${prefix}.fusionreport.tsv
+    touch ${prefix}_fusionreport_index.html
+    touch AAA_BBB.html
+    touch ${prefix}.fusions.csv
+    touch ${prefix}.fusions.json
+    """
+}

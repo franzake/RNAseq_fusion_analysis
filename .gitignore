@@ -1,0 +1,48 @@
+# ── Large / binary data (never commit to git) ──────────────────────────────
+data/references/
+data/*.bam
+data/*.bai
+data/*.fastq.gz
+data/*.fq.gz
+data/*.fastq
+data/*.fq
+data/*.gtf
+data/*.fa
+data/*.fasta
+data/*.fa.gz
+data/*.fasta.gz
+data/*.genePred
+data/*.bed
+data/*.dict
+data/*.interval_list
+
+# ── Clinical / patient metadata (sensitive) ────────────────────────────────
+**/*.xlsx
+**/*.xls
+**/*.csv.bak
+
+# ── Nextflow runtime artifacts ─────────────────────────────────────────────
+work/
+.nextflow/
+.nextflow.log
+.nextflow.log.*
+*.nextflow.log
+
+# ── Singularity image cache ────────────────────────────────────────────────
+**/*.sif
+**/singularity/
+
+# ── Results (written to Oak, not tracked here) ─────────────────────────────
+runs/results/
+results/
+
+# ── Scratch symlink / conda env cache ─────────────────────────────────────
+$SCRATCH/
+runs/results/
+
+# ── Editor / OS noise ─────────────────────────────────────────────────────
+.DS_Store
+*.swp
+*~
+__pycache__/
+*.pyc
