@@ -1,0 +1,2 @@
+sample,fastq_1,fastq_2,strandedness
+A87_S24,/oak/stanford/groups/bhowitt/DNAnexus/Fastqs/200803_A00646_0057_BHTHTNDMXX/A87_S24_R1_001.fastq.gz,/oak/stanford/groups/bhowitt/DNAnexus/Fastqs/200803_A00646_0057_BHTHTNDMXX/A87_S24_R2_001.fastq.gz,reverse
